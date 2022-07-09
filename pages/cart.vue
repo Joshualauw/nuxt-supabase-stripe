@@ -1,6 +1,9 @@
 <template>
-    <div v-if="!pending" class="flex flex-col md:flex-row justify-center items-start mx-20 space-x-20 mt-10">
-        <div class="w-[500px] h-full">
+    <div
+        v-if="!pending"
+        class="flex flex-col md:flex-row justify-center items-center md:items-start mx-20 md:space-x-20 mt-10 mb-14"
+    >
+        <div class="w-full md:w-[600px] h-full">
             <h1 class="text-2xl font-bold border-b pb-4 border-gray-300 mb-6">Shopping Cart</h1>
             <div
                 v-for="cart in carts"

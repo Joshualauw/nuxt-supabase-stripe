@@ -1,5 +1,5 @@
 <template>
-    <div class="mx-8 sm:mx-14 md:mx-20 my-10">
+    <div class="mx-12 md:mx-20 my-10">
         <div
             v-if="!pending"
             class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 md:grid-cols-3 md:gap-10 lg:grid-cols-4"
@@ -9,7 +9,7 @@
                 <div class="p-4">
                     <p class="text-lg font-semibold">{{ color.name }}</p>
                     <p class="text-gray-500 h-12 mb-6">{{ color.description }}</p>
-                    <div class="flex justify-between items-center">
+                    <div class="flex sm:flex-col lg:flex-row justify-between items-center">
                         <p class="text-lg font-bold">${{ color.price }}.00</p>
                         <button
                             @click="addCart(color)"
