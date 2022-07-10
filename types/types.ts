@@ -12,3 +12,9 @@ export interface Cart {
     user_id?: string;
     count?: number;
 }
+
+export interface ApiResponse {
+    data?: any;
+    message?: string;
+    error?: string;
+}

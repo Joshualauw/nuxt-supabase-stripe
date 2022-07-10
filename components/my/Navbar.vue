@@ -38,6 +38,9 @@
                     <NuxtLink to="/profile"
                         ><p class="px-4 hover:bg-gray-200 cursor-pointer border-b py-0.5">profile</p></NuxtLink
                     >
+                    <NuxtLink to="/history"
+                        ><p class="px-4 hover:bg-gray-200 cursor-pointer border-b py-0.5">transactions</p></NuxtLink
+                    >
                     <p @click="logout" class="px-4 hover:bg-gray-200 cursor-pointer py-0.5">logout</p>
                 </div>
             </div>

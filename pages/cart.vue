@@ -5,7 +5,9 @@
     >
         <div class="w-full md:w-[600px] h-full">
             <h1 class="text-2xl font-bold border-b pb-4 border-gray-300 mb-6">Shopping Cart</h1>
+            <div v-if="carts.length == 0" class="text-lg font-semibold text-center">Your cart is empty!</div>
             <div
+                v-else
                 v-for="cart in carts"
                 class="mb-6 h-40 flex justify-start items-start space-x-6 border-b pb-6 border-gray-300"
             >
@@ -34,7 +36,7 @@
                 </div>
             </div>
         </div>
-        <div class="w-[300px] h-full p-5 bg-gray-100 rounded-md mt-10">
+        <form @submit.prevent="buyCart" class="w-[300px] h-full p-5 bg-gray-100 rounded-md mt-10">
             <h1 class="text-xl font-semibold mb-4">Order Summary</h1>
             <div class="flex justify-between items-center mb-5">
                 <p>Subtotal</p>
@@ -50,12 +52,13 @@
                 <p>${{ subtotal + subtotal / 10 }}.00</p>
             </div>
             <button class="px-4 py-2 rounded-md bg-black text-white w-full">Checkout</button>
-        </div>
+        </form>
     </div>
 </template>
 
 <script setup lang="ts">
 import { Cart } from "~~/types/types";
+import Swal from "sweetalert2";
 
 definePageMeta({
     middleware: ["auth"],
@@ -63,6 +66,7 @@ definePageMeta({
 
 const client = useSupabaseClient();
 const user = useSupabaseUser();
+const route = useRoute();
 
 const pending = ref<boolean>(false);
 const carts = ref<Cart[]>([]);
@@ -73,11 +77,21 @@ carts.value = [];
 carts.value.push(...data);
 pending.value = false;
 
-// const { data: carts, pending } = await useAsyncData("carts", async () => {
-//     const { data } = await client.from<Cart>("carts").select(`*, colors(*)`);
-//     return data;
-// });
-// console.log(carts.value);
+if (route.query.success) {
+    Swal.fire({
+        title: "payment successful",
+        icon: "success",
+    });
+}
+if (route.query.canceled) {
+    Swal.fire({
+        title: "payment canceled",
+        icon: "warning",
+    });
+}
+
+delete route.query.success;
+delete route.query.error;
 
 const subtotal = computed(() => {
     let total = 0;
@@ -94,6 +108,19 @@ const updateCart = async (cart: Cart) => {
             count: cart.count,
         })
         .eq("id", cart.id);
+};
+
+const buyCart = async () => {
+    const { data, error } = await $fetch("/api/buy", {
+        method: "POST",
+        body: carts.value,
+    });
+    if (!error) {
+        await client.from<Cart>("carts").delete().match({ user_id: user.value.id });
+        window.location.href = data.url;
+    } else {
+        console.log(error);
+    }
 };
 
 const addCount = async (cart: Cart) => {
