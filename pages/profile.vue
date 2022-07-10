@@ -64,9 +64,9 @@ const submitForm = async () => {
         upsert: true,
     });
     if (!error) {
-        const { signedURL } = await client.storage.from("colorfest-bucket").createSignedUrl(`avatars/${imagePath}`, 60);
+        const { publicURL } = await client.storage.from("colorfest-bucket").getPublicUrl(`avatars/${imagePath}`);
         await client.auth.update({
-            data: { username: username.value, profile_picture: signedURL },
+            data: { username: username.value, profile_picture: publicURL },
         });
         alert("profile updated");
     } else {
