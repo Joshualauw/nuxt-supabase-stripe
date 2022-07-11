@@ -36,7 +36,11 @@
                 </div>
             </div>
         </div>
-        <form @submit.prevent="buyCart" class="w-[300px] h-full p-5 bg-gray-100 rounded-md mt-10">
+        <form
+            v-if="carts.length != 0"
+            @submit.prevent="buyCart"
+            class="w-[300px] h-full p-5 bg-gray-100 rounded-md mt-10"
+        >
             <h1 class="text-xl font-semibold mb-4">Order Summary</h1>
             <div class="flex justify-between items-center mb-5">
                 <p>Subtotal</p>
@@ -57,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { Cart } from "~~/types/types";
+import { Cart, Dtrans, Htrans } from "~~/types/types";
 import Swal from "sweetalert2";
 
 definePageMeta({
@@ -66,6 +70,7 @@ definePageMeta({
 
 const client = useSupabaseClient();
 const user = useSupabaseUser();
+const cartCount = useCartCount();
 const route = useRoute();
 
 const pending = ref<boolean>(false);
@@ -78,20 +83,27 @@ carts.value.push(...data);
 pending.value = false;
 
 if (route.query.success) {
+    await client.from<Cart>("carts").delete().match({ user_id: user.value.id });
+    cartCount.value = 0;
+    await client
+        .from<Htrans>("htrans")
+        .update({ status: "success" })
+        .match({ user_id: user.value.id, status: "pending" });
     Swal.fire({
         title: "payment successful",
         icon: "success",
     });
 }
 if (route.query.canceled) {
+    await client
+        .from<Htrans>("htrans")
+        .update({ status: "canceled" })
+        .match({ user_id: user.value.id, status: "pending" });
     Swal.fire({
         title: "payment canceled",
         icon: "warning",
     });
 }
-
-delete route.query.success;
-delete route.query.error;
 
 const subtotal = computed(() => {
     let total = 0;
@@ -116,7 +128,20 @@ const buyCart = async () => {
         body: carts.value,
     });
     if (!error) {
-        await client.from<Cart>("carts").delete().match({ user_id: user.value.id });
+        const htrans = await client.from<Htrans>("htrans").insert({
+            total: subtotal.value,
+            user_id: user.value.id,
+            status: "pending",
+        });
+        const dtrans = carts.value.map((c) => {
+            return {
+                htrans_id: htrans.body[0].id,
+                color_id: c.colors.id,
+                price: c.colors.price * c.count,
+                quantity: c.count,
+            };
+        });
+        await client.from<Dtrans>("dtrans").insert(dtrans);
         window.location.href = data.url;
     } else {
         console.log(error);

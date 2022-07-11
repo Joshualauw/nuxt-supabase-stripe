@@ -1,7 +1,8 @@
 <template>
     <div class="min-h-full w-1/2 mx-auto flex flex-col items-center justify-center py-12 sm:px-6 lg:px-8">
         <img :src="user.user_metadata.profile_picture" class="w-48 h-48 rounded-full mb-4" />
-        <p class="text-xl font-semibold mb-8">{{ user.user_metadata.username }}</p>
+        <p class="text-xl font-semibold">{{ user.user_metadata.username }}</p>
+        <p class="text-lg mb-6">{{ user.email }}</p>
         <button @click="isEdit = !isEdit" class="px-3 py-1 rounded-md bg-black text-white">
             Edit {{ isEdit ? "On" : "Off" }}
         </button>
