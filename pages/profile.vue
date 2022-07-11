@@ -59,19 +59,22 @@ const submitForm = async () => {
         return;
     }
 
-    const extension = fileData.value.name.split(".")[1];
-    const imagePath = user.value.id.replaceAll("-", "") + "." + extension;
-    const { error } = await client.storage.from("colorfest-bucket").upload(`avatars/${imagePath}`, fileData.value, {
-        upsert: true,
-    });
-    if (!error) {
-        const { publicURL } = await client.storage.from("colorfest-bucket").getPublicUrl(`avatars/${imagePath}`);
-        await client.auth.update({
-            data: { username: username.value, profile_picture: publicURL },
+    let profile_picture;
+    if (fileData.value) {
+        const extension = fileData.value.name.split(".")[1];
+        const imagePath = user.value.id.replaceAll("-", "") + "." + extension;
+        const { error } = await client.storage.from("colorfest-bucket").upload(`avatars/${imagePath}`, fileData.value, {
+            upsert: true,
         });
-        alert("profile updated");
-    } else {
-        errors.value = error.message;
+        const { publicURL } = await client.storage.from("colorfest-bucket").getPublicUrl(`avatars/${imagePath}`);
+        profile_picture = publicURL;
     }
+    await client.auth.update({
+        data: {
+            username: username.value,
+            profile_picture: profile_picture || user.value.user_metadata.profile_picture,
+        },
+    });
+    alert("profile updated");
 };
 </script>
