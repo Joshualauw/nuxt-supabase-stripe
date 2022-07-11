@@ -9,7 +9,7 @@
                         <span class="py-1 px-3 rounded-full font-semibold mr-2" :class="getStatusColor(trans.status)">{{
                             trans.status
                         }}</span>
-                        <span v-if="trans.status == 'success'" class="px-3 py-0.5 rounded-full bg-blue-400">See receipt</span>
+                        <!-- <span v-if="trans.status == 'success'" class="px-3 py-0.5 rounded-full bg-blue-400">See receipt</span> -->
                     </p>
                 </div>
                 <p class="font-bold">Details:</p>
@@ -31,14 +31,14 @@ import { Htrans } from "~~/types/types";
 
 const client = useSupabaseClient();
 const user = useSupabaseUser();
+const pending = ref<boolean>(false);
+const transactions = ref<Htrans[]>([]);
 
-const { data: transactions, pending } = await useAsyncData("transactions", async () => {
-    const { data } = await client
-        .from<Htrans>("htrans")
-        .select("*, dtrans(*, colors(*))")
-        .eq("user_id",user.value.id );
-    return data;
-});
+pending.value = true;
+const { data } = await client.from<Htrans>("htrans").select("*, dtrans(*, colors(*))").eq("user_id",user.value.id );
+transactions.value = [];
+transactions.value.push(...data);
+pending.value = false;
 
 const getStatusColor = (status: string) => {
     if (status == "success") return "bg-green-300 text-green-700";

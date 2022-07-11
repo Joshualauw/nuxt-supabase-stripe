@@ -8,7 +8,7 @@
                 <li v-if="!user" class="hover:text-sky-600 hover:underline">
                     <NuxtLink to="/register">Register</NuxtLink>
                 </li>
-                <li class="hover:text-sky-600 hover:underline"><NuxtLink to="/">About</NuxtLink></li>
+                <li class="hover:text-sky-600 hover:underline"><NuxtLink to="/about">About</NuxtLink></li>
             </ul>
             <div v-if="user" class="flex items-center space-x-5 relative">
                 <NuxtLink to="/cart" class="relative">
